@@ -1,4 +1,3 @@
-````markdown
 # 🔐 VaultFlow: A Secure, Zero-Knowledge File Vault
 
 **VaultFlow** is a privacy-first web-based file storage and sharing platform built on a **Zero-Knowledge Architecture** — meaning the server cannot access your files or passwords.  
