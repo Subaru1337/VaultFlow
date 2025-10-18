@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero-Knowledge Encryptor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container { display: block; }
+        .hidden { display: none; }
+
+        /* Styles for the password strength meter */
+        #strength-bar-container {
+            height: 5px;
+            width: 100%;
+            background-color: #374151; /* gray-700 */
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        #strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-2xl shadow-lg">
+        <div>
+            <h2 id="form-title" class="text-3xl font-bold text-center text-indigo-400">Login to Your Vault</h2>
+            <p class="mt-2 text-center text-sm text-gray-400">Secure, client-side file encryption</p>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="login-form" class="mt-8 space-y-6 form-container">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <input id="login-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                </div>
+                <div>
+                    <input id="login-password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                </div>
+            </div>
+            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-800">
+                Sign in
+            </button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="mt-8 space-y-6 form-container hidden">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div><input id="register-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Email address"></div>
+                <div>
+                    <input id="register-password" name="password" type="password" autocomplete="new-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Password">
+                </div>
+                <div>
+                    <input id="register-password-confirm" name="password-confirm" type="password" autocomplete="new-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 placeholder-gray-500 text-white rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Confirm Password">
+                </div>
+            </div>
+            <!-- Password Strength Indicator -->
+            <div id="strength-container" class="hidden">
+                <div id="strength-bar-container">
+                    <div id="strength-bar"></div>
+                </div>
+                <p id="strength-text" class="text-xs text-gray-400 mt-1"></p>
+            </div>
+            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-800">
+                Create Account
+            </button>
+        </form>
+
+        <div class="text-sm text-center">
+            <a href="#" id="toggle-link" class="font-medium text-indigo-400 hover:text-indigo-300">
+                Don't have an account? Register
+            </a>
+        </div>
+        <p id="error-message" class="text-center text-sm text-red-400 mt-2"></p>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const toggleLink = document.getElementById('toggle-link');
+    const formTitle = document.getElementById('form-title');
+    const errorMessage = document.getElementById('error-message');
+
+    const registerPassword = document.getElementById('register-password');
+    const registerPasswordConfirm = document.getElementById('register-password-confirm');
+    const strengthContainer = document.getElementById('strength-container');
+    const strengthBar = document.getElementById('strength-bar');
+    const strengthText = document.getElementById('strength-text');
+    
+    let isLogin = true;
+
+    toggleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLogin = !isLogin;
+        errorMessage.textContent = '';
+        strengthContainer.classList.add('hidden'); // Hide strength bar on toggle
+        if (isLogin) {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            formTitle.textContent = 'Login to Your Vault';
+            toggleLink.textContent = 'Don\'t have an account? Register';
+        } else {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            formTitle.textContent = 'Create a Secure Account';
+            toggleLink.textContent = 'Already have an account? Login';
+        }
+    });
+
+    // --- Password Strength Logic ---
+    registerPassword.addEventListener('input', () => {
+        const password = registerPassword.value;
+        if (password.length === 0) {
+            strengthContainer.classList.add('hidden');
+            return;
+        }
+        strengthContainer.classList.remove('hidden');
+
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++; // Special character
+
+        let strength = 'Very Weak';
+        let color = 'bg-red-500'; // Tailwind red
+        let width = '20%';
+
+        switch (score) {
+            case 2: strength = 'Weak'; width = '40%'; color = 'bg-orange-500'; break;
+            case 3: strength = 'Medium'; width = '60%'; color = 'bg-yellow-500'; break;
+            case 4: strength = 'Strong'; width = '80%'; color = 'bg-green-500'; break;
+            case 5: strength = 'Very Strong'; width = '100%'; color = 'bg-emerald-500'; break;
+        }
+        
+        strengthBar.style.width = width;
+        strengthBar.className = color;
+        strengthText.textContent = `Strength: ${strength}`;
+    });
+
+    // --- Form Submission Logic ---
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMessage.textContent = '';
+        const formData = new FormData(loginForm);
+        const response = await fetch('/login', { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            // IMPORTANT: Store the key derivation salt received from the server.
+            sessionStorage.setItem('userSalt', result.salt);
+            window.location.href = '/dashboard';
+        } else {
+            errorMessage.textContent = result.message || 'Login failed.';
+        }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMessage.textContent = '';
+        
+        const password = registerPassword.value;
+        const passwordConfirm = registerPasswordConfirm.value;
+
+        if (password !== passwordConfirm) {
+            errorMessage.textContent = 'Passwords do not match.';
+            return;
+        }
+        
+        // Check strength again on submit
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        if (score < 3) {
+             errorMessage.textContent = 'Password is too weak. Please use a stronger one.';
+             return;
+        }
+        
+        const formData = new FormData(registerForm);
+        const response = await fetch('/register', { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            errorMessage.textContent = result.message;
+            // Switch to login form on successful registration
+            toggleLink.click();
+            document.getElementById('login-email').value = formData.get('email');
+            document.getElementById('login-password').focus();
+        } else {
+            errorMessage.textContent = result.message || 'Registration failed.';
+        }
+    });
+});
+</script>
+</body>
+</html>
+
