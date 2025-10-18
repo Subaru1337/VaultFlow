@@ -1,66 +1,144 @@
-VaultFlow: A Secure, Zero-Knowledge File Vault
+````markdown
+# 🔐 VaultFlow: A Secure, Zero-Knowledge File Vault
 
-VaultFlow is a web-based file storage and sharing platform built on a zero-knowledge architecture. This means the server has no technical ability to access user files, guaranteeing complete privacy. All encryption and decryption operations are performed directly in the user's browser using modern, standard cryptographic algorithms.
+**VaultFlow** is a privacy-first web-based file storage and sharing platform built on a **Zero-Knowledge Architecture** — meaning the server cannot access your files or passwords.  
+All encryption and decryption are done **client-side** using strong, industry-standard cryptography, ensuring **true end-to-end security**.
 
-Core Features
+---
 
-Zero-Knowledge Architecture: The server acts only as a dumb storage provider and has no access to plaintext files or user passwords.
+## 🚀 Features
 
-End-to-End Encryption: Files are encrypted and decrypted exclusively on the client-side using AES-256-GCM.
+- **🧠 Zero-Knowledge Architecture**  
+  The server acts purely as storage — it never sees your plaintext files or passwords.
 
-Secure Authentication: User passwords are not stored. Instead, bcrypt is used for hashing, and PBKDF2 is used for deriving the encryption key.
+- **🔒 End-to-End Encryption**  
+  Files are encrypted and decrypted exclusively on the client-side using **AES-256-GCM**.
 
-Ephemeral & Secure File Sharing: Users can generate time-limited, password-protected links to share files securely. This is achieved via a client-side "re-keying" process.
+- **🧩 Secure Authentication**  
+  Passwords are never stored.  
+  - **bcrypt**: For password hashing  
+  - **PBKDF2**: For deriving encryption keys
 
-Modern Frontend: A clean, responsive UI with features like drag-and-drop uploads, password strength meters, and secure password prompts.
+- **📤 Ephemeral & Secure File Sharing**  
+  Generate **time-limited, password-protected links** using a client-side re-keying process.
 
-Technology Stack
+- **💡 Modern Frontend**  
+  Clean, responsive UI built with:
+  - Drag-and-drop uploads  
+  - Password strength meter  
+  - Secure password prompts
 
-Backend: Python, Flask
+---
 
-Database: PostgreSQL
+## 🧰 Tech Stack
 
-Frontend: HTML, Tailwind CSS, Vanilla JavaScript
+| Component | Technology |
+|------------|-------------|
+| **Backend** | Python (Flask) |
+| **Database** | PostgreSQL |
+| **Frontend** | HTML, Tailwind CSS, Vanilla JavaScript |
+| **Cryptography** | Web Crypto API (AES-256-GCM, PBKDF2), bcrypt |
+| **Environment Management** | python-dotenv |
 
-Cryptography: Web Crypto API (AES-256-GCM, PBKDF2), bcrypt
+---
 
-Environment Management: python-dotenv
+## ⚙️ Local Setup
 
-How to Run Locally
+Follow these steps to set up and run **VaultFlow** locally.
 
-Clone the repository:
+### 1. Clone the Repository
 
+```bash
 git clone <your-repo-url>
 cd <your-repo-folder>
+````
 
+### 2. Create a Virtual Environment & Install Dependencies
 
-Create a virtual environment and install dependencies:
-
+```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Activate environment
+source venv/bin/activate      # On macOS/Linux
+venv\Scripts\activate         # On Windows
+
+# Install dependencies
 pip install -r requirements.txt
+```
 
+### 3. Set Up the Database
 
-Set up the database:
+* Connect to your PostgreSQL database (e.g., on **Neon** or local instance).
+* Run the SQL commands in `schema.sql` to create the following tables:
 
-Connect to your PostgreSQL database (e.g., on Neon).
+  * `users`
+  * `files`
+  * `shared_files`
 
-Run the SQL commands provided in schema.sql to create the users, files, and shared_files tables.
+### 4. Configure Environment Variables
 
-Set up environment variables:
+This project uses a `.env` file for local development secrets.
 
-This project uses a .env file to manage secret keys for local development.
+```bash
+# Copy the example file
+cp .env.example .env    # (macOS/Linux)
+# or
+copy .env.example .env  # (Windows)
+```
 
-Make a copy of the example file: cp .env.example .env (on Mac/Linux) or copy .env.example .env (on Windows).
+Open the `.env` file and update the database connection string:
 
-Open the new .env file and replace the placeholder with your actual database connection string. This file is ignored by Git and should never be committed.
-
+```bash
 DATABASE_URL="your_actual_database_url_here"
+```
 
+> ⚠️ **Note:** The `.env` file is ignored by Git for security reasons.
 
-Run the application:
+---
 
+### 5. Run the Application
+
+```bash
 python app.py
+```
 
+Once running, open your browser and visit:
 
-The application will now start up, reading your DATABASE_URL from the .env file. It will be running at http://127.0.0.1:5001.
+👉 **[http://127.0.0.1:5001](http://127.0.0.1:5001)**
+
+---
+
+## 🔐 Security Highlights
+
+* All encryption/decryption happens **in-browser** (client-side only).
+* The server stores only **ciphertext**, not plaintext data.
+* User credentials and encryption keys never leave the client device.
+
+---
+
+## 📸 UI Highlights
+
+* Responsive dashboard for uploads & sharing
+* Drag-and-drop file uploads
+* Secure password and sharing prompts
+
+---
+
+## 💬 Acknowledgments
+
+Built with ❤️ using:
+
+* Flask
+* Tailwind CSS
+* Web Crypto API
+* PostgreSQL
+
+---
+
+### 👨‍💻 Developer
+
+**VaultFlow** — A project by *Varad Mhatre*
+For feedback or suggestions, feel free to open an issue or submit a pull request.
+
+```
+
+---
